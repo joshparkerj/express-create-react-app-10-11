@@ -6,6 +6,6 @@ app.get('/',(req,res) => {
   res.sendFile('./build/index.html');
 })
 
-app.listen(4000,() => {
-  console.log('now listening on port 4000')
+app.listen(80,() => {
+  console.log('now listening on port 80')
 })
