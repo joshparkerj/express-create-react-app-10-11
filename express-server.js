@@ -1,13 +1,21 @@
-const express = require('express');
-
-const app = express();
 const fs = require('fs');
+const express = require('express');
+const escape = require('escape-html');
+const rateLimit = require('express-rate-limit');
+
 const bodyParser = require('body-parser');
 const data = require('./data.json');
 
+const app = express();
+
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+}));
+
 app.use(bodyParser.json());
 app.use(express.static('./build'));
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.sendFile('./build/index.html');
 });
 
@@ -17,8 +25,8 @@ app.post('/', (req, res) => {
   res.status(200).send();
 });
 
-app.get('/data', (req, res) => {
-  res.send(data);
+app.get('/data', (_, res) => {
+  res.send(escape(data));
 });
 
 app.listen(process.env.PORT || 8080);
