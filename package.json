@@ -18,7 +18,7 @@
     "start": "node express-server.js",
     "lint": "npx eslint \"./src/*.jsx\" \"./*.js\"",
     "build": "webpack",
-    "test": "jest"
+    "test": "jest  --coverage"
   },
   "eslintConfig": {
     "extends": "react-app"

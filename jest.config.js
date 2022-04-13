@@ -6,4 +6,7 @@ module.exports = {
   moduleNameMapper: {
     '\\.css$': 'identity-obj-proxy',
   },
+  coverageReporters: [
+    'cobertura',
+  ]
 };
