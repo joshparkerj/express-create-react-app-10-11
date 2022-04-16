@@ -3,10 +3,12 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const escapeHtml = require('escape-html');
 
 const { read, write } = require('./read-write');
 
 const data = [];
+const dataFields = new Set(['price', 'size', 'brand', 'color']);
 
 const expressServer = async function expressServer() {
   try {
@@ -33,8 +35,10 @@ const expressServer = async function expressServer() {
 
   app.post('/', async ({ body }, res) => {
     console.log(body);
-    if (Object.keys(body).length > 0) {
-      data.push({ ...body, id: data.length });
+    const keys = Object.keys(body).filter((key) => dataFields.has(key));
+    if (keys.length > 0) {
+      const sanitizedBody = keys.reduce((acc, e) => ({ ...acc, [e]: escapeHtml(body[e]) }), {});
+      data.push({ ...sanitizedBody, id: data.length });
       try {
         await write('./data.json', JSON.stringify(data));
         res.status(200).send();
