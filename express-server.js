@@ -1,32 +1,12 @@
 /* eslint-disable no-console */
-const { readFile, writeFile } = require('fs');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
-
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const { read, write } = require('./read-write');
+
 const data = [];
-
-const read = (fileName) => (new Promise((resolve, reject) => {
-  readFile(fileName, (err, contents) => {
-    if (err) {
-      reject(err);
-    } else {
-      resolve(contents);
-    }
-  });
-}));
-
-const write = (fileName, contents) => (new Promise((resolve, reject) => {
-  writeFile(fileName, contents, (err) => {
-    if (err) {
-      reject(err);
-    } else {
-      resolve();
-    }
-  });
-}));
 
 const expressServer = async function expressServer() {
   try {
