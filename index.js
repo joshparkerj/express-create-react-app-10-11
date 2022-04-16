@@ -1,3 +1,1 @@
-const expressServer = require('./express-server');
-
-expressServer().then((esi) => esi.start());
+require('./express-server')();
