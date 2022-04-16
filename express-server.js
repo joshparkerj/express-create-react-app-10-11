@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('fs/promises');
+const { readFile, writeFile } = require('fs');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 
@@ -8,9 +8,29 @@ const cors = require('cors');
 
 const data = [];
 
+const read = (fileName) => (new Promise((resolve, reject) => {
+  readFile(fileName, (err, contents) => {
+    if (err) {
+      reject(err);
+    } else {
+      resolve(contents);
+    }
+  });
+}));
+
+const write = (fileName, contents) => (new Promise((resolve, reject) => {
+  writeFile(fileName, contents, (err) => {
+    if (err) {
+      reject(err);
+    } else {
+      resolve();
+    }
+  });
+}));
+
 const expressServer = async function expressServer() {
   try {
-    const fileContent = await fs.readFile('./data.json');
+    const fileContent = await read('./data.json');
     data.push(...JSON.parse(fileContent));
   } catch (e) {
     console.error(e);
@@ -36,7 +56,7 @@ const expressServer = async function expressServer() {
     if (Object.keys(body).length > 0) {
       data.push({ ...body, id: data.length });
       try {
-        await fs.writeFile('./data.json', JSON.stringify(data));
+        await write('./data.json', JSON.stringify(data));
         res.status(200).send();
       } catch (e) {
         console.error(e);
