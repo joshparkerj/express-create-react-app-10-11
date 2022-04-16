@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { string } from 'prop-types';
 import { ToastContainer, toast } from 'react-toastify';
+import axios from 'axios';
 
 import Form from './Form';
 import Field from './Field';
@@ -10,23 +12,24 @@ import Item from './Item';
 import './App.css';
 import 'react-toastify/dist/ReactToastify.min.css';
 
-const App = function App() {
+const App = function App({ rootUrl }) {
   const [color, setColor] = useState('');
   const [size, setSize] = useState('');
   const [price, setPrice] = useState('');
   const [brand, setBrand] = useState('');
   const [stuff, setStuff] = useState([]);
 
-  const handleLoad = (f, t) => {
-    f(t)
-      .then((res) => res.json())
-      .then((res) => {
-        if (Array.isArray(res)) {
-          setStuff(res);
-        } else {
-          toast.warn('nothing loaded...');
-        }
-      });
+  const handleLoad = async (target) => {
+    try {
+      const { data } = await axios.get(`${rootUrl}${target}`);
+      if (Array.isArray(data)) {
+        setStuff(data);
+      } else {
+        toast.warn('nothing loaded...');
+      }
+    } catch (e) {
+      toast.error(e);
+    }
   };
 
   return (
@@ -34,10 +37,10 @@ const App = function App() {
       <h1>Fab App</h1>
       <ToastContainer />
       <div className="various-forms">
-        <Form name="color" onChange={({ target }) => setColor(target.value)} />
-        <Form name="size" onChange={({ target }) => setSize(target.value)} />
-        <Form name="price" onChange={({ target }) => setPrice(target.value)} />
-        <Form name="brand" onChange={({ target }) => setBrand(target.value)} />
+        <Form name="color" onChange={({ target: { value } }) => setColor(value)} />
+        <Form name="size" onChange={({ target: { value } }) => setSize(value)} />
+        <Form name="price" onChange={({ target: { value } }) => setPrice(value)} />
+        <Form name="brand" onChange={({ target: { value } }) => setBrand(value)} />
       </div>
       <Field text={color} />
       <Field text={size} />
@@ -45,16 +48,24 @@ const App = function App() {
       <Field text={brand} />
       <Save
         data={{
-          color, size, price, brand, stuff,
+          color, size, price, brand,
         }}
-        target="/"
+        target={`${rootUrl}/`}
       />
       <Load target="/data" update={handleLoad} />
-      {stuff.map((e) => (
-        <Item key={e} content={e} />
+      {stuff.map(({ id, ...rest }) => (
+        <Item key={id} content={rest} />
       ))}
     </div>
   );
+};
+
+App.propTypes = {
+  rootUrl: string,
+};
+
+App.defaultProps = {
+  rootUrl: 'http://localhost:8080',
 };
 
 export default App;

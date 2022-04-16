@@ -4,8 +4,10 @@ import PropTypes from 'prop-types';
 const Form = function Form({ name, onChange }) {
   return (
     <div className="form">
-      form
-      <input name={name} onChange={onChange} />
+      <label htmlFor={name}>
+        {name}
+        <input id={name} name={name} onChange={onChange} />
+      </label>
     </div>
   );
 };

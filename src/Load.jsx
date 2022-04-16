@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const Load = function Load({ update, target }) {
   return (
     <div className="load">
-      <button type="button" onClick={() => update(fetch, target)}>
+      <button type="button" onClick={() => update(target)}>
         load
       </button>
     </div>

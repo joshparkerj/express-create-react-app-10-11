@@ -1,32 +1,58 @@
-const fs = require('fs');
+/* eslint-disable no-console */
+const fs = require('fs/promises');
 const express = require('express');
-const escape = require('escape-html');
 const rateLimit = require('express-rate-limit');
 
 const bodyParser = require('body-parser');
-const data = require('./data.json');
+const cors = require('cors');
 
-const app = express();
+const data = [];
 
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 300,
-}));
+const expressServer = async function expressServer() {
+  try {
+    const fileContent = await fs.readFile('./data.json');
+    data.push(...JSON.parse(fileContent));
+  } catch (e) {
+    console.error(e);
+  }
 
-app.use(bodyParser.json());
-app.use(express.static('./build'));
-app.get('/', (_, res) => {
-  res.sendFile('./build/index.html');
-});
+  const app = express();
 
-app.post('/', (req, res) => {
-  data.push(req.body);
-  fs.writeFile('./data.json', JSON.stringify(data));
-  res.status(200).send();
-});
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+  }));
 
-app.get('/data', (_, res) => {
-  res.send(escape(data));
-});
+  app.use(cors());
 
-app.listen(process.env.PORT || 8080);
+  app.use(bodyParser.json());
+
+  app.use(express.static('./build'));
+  app.use(express.static('./dist'));
+  app.use(express.static('./public'));
+
+  app.post('/', async ({ body }, res) => {
+    console.log(body);
+    if (Object.keys(body).length > 0) {
+      data.push({ ...body, id: data.length });
+      try {
+        await fs.writeFile('./data.json', JSON.stringify(data));
+        res.status(200).send();
+      } catch (e) {
+        console.error(e);
+        res.status(500).send('dying over here');
+      }
+    } else {
+      res.status(200).send();
+    }
+  });
+
+  app.get('/data', (_, res) => {
+    res.send(JSON.stringify(data.filter((e) => e)));
+  });
+
+  const port = process.env.PORT || 8080;
+  return app.listen(port, () => console.log(`now started listening on port: ${port}`));
+};
+
+module.exports = expressServer;
